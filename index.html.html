@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>정부 안내서비스 빠른 검색</title>
+  <style>
+    :root {
+      --primary-color: #0056b3;
+      --bg-color: #f8f9fa;
+      --card-border: #e9ecef;
+      --text-dark: #212529;
+      --text-muted: #6c757d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-dark);
+      padding: 24px 16px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* 검색 및 필터 컨트롤 영역 */
+    .controls {
+      background: #ffffff;
+      padding: 18px 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      flex: 1 1 500px;
+    }
+
+    .search-input {
+      flex: 1 1 240px;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.15);
+    }
+
+    .category-select {
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      background-color: #fff;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .count-badge {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      background-color: #e7f1ff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    /* 카드 그리드 영역 */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .badge-category {
+      background-color: #f1f3f5;
+      color: #495057;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+
+    .card-body {
+      font-size: 0.9rem;
+      color: #495057;
+    }
+
+    .info-row {
+      display: flex;
+      margin-bottom: 6px;
+    }
+
+    .info-label {
+      width: 85px;
+      color: var(--text-muted);
+    }
+
+    .info-value {
+      font-weight: 500;
+    }
+
+    .online-tag {
+      font-weight: 600;
+    }
+
+    .online-tag.possible {
+      color: #2b8a3e;
+    }
+
+    .online-tag.impossible {
+      color: #c92a2a;
+    }
+
+    .card-footer {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .call-center {
+      font-weight: 700;
+      color: var(--primary-color);
+      font-size: 1.05rem;
+    }
+
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 48px;
+      background: #fff;
+      border-radius: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>정부 안내서비스 안내검색</h1>
+      <p>원하시는 정부 서비스를 키워드 검색 및 분야별 필터로 빠르게 찾아보세요.</p>
+    </header>
+
+    <!-- 검색 및 필터 컨트롤 -->
+    <div class="controls">
+      <div class="filter-group">
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="search-input" 
+          placeholder="서비스명 검색 (예: 주민등록, 지원금...)"
+        >
+        <select id="categorySelect" class="category-select">
+          <option value="ALL">전체 분야 보기</option>
+          <option value="민원">민원</option>
+          <option value="복지">복지</option>
+          <option value="세금">세금</option>
+          <option value="교통">교통</option>
+          <option value="재난">재난</option>
+          <option value="일자리">일자리</option>
+          <option value="교육">교육</option>
+        </select>
+      </div>
+      <div class="count-badge">
+        현재 표시 <span id="countNumber">24</span>건
+      </div>
+    </div>
+
+    <!-- 카드 목록 영역 -->
+    <div id="serviceGrid" class="grid"></div>
+  </div>
+
+  <script>
+    // 24건 서비스 데이터 원본
+    const serviceData = [
+      {"서비스ID": "A001", "서비스명": "주민등록 발급 안내", "안내분야": "민원", "소관기관": "국토교통부", "온라인안내": "가능", "콜센터": "1374"},
+      {"서비스ID": "A002", "서비스명": "전입신고 안내", "안내분야": "민원", "소관기관": "보건복지부", "온라인안내": "가능", "콜센터": "1352"},
+      {"서비스ID": "A003", "서비스명": "인감증명 안내", "안내분야": "민원", "소관기관": "국토교통부", "온라인안내": "가능", "콜센터": "1313"},
+      {"서비스ID": "A004", "서비스명": "민원접수 안내", "안내분야": "민원", "소관기관": "교육부", "온라인안내": "가능", "콜센터": "1341"},
+      {"서비스ID": "A005", "서비스명": "정부24 이용 안내", "안내분야": "민원", "소관기관": "국토교통부", "온라인안내": "가능", "콜센터": "1356"},
+      {"서비스ID": "A006", "서비스명": "기초연금 안내", "안내분야": "복지", "소관기관": "행정안전부", "온라인안내": "불가", "콜센터": "1386"},
+      {"서비스ID": "A007", "서비스명": "복지급여 안내", "안내분야": "복지", "소관기관": "고용노동부", "온라인안내": "가능", "콜센터": "1319"},
+      {"서비스ID": "A008", "서비스명": "장애인지원 안내", "안내분야": "복지", "소관기관": "보건복지부", "온라인안내": "가능", "콜센터": "1337"},
+      {"서비스ID": "A009", "서비스명": "아동수당 안내", "안내분야": "복지", "소관기관": "지자체", "온라인안내": "가능", "콜센터": "1326"},
+      {"서비스ID": "A010", "서비스명": "지방세 납부 안내", "안내분야": "세금", "소관기관": "보건복지부", "온라인안내": "가능", "콜센터": "1357"},
+      {"서비스ID": "A011", "서비스명": "취득세 안내", "안내분야": "세금", "소관기관": "국토교통부", "온라인안내": "가능", "콜센터": "1341"},
+      {"서비스ID": "A012", "서비스명": "재산세 안내", "안내분야": "세금", "소관기관": "지자체", "온라인안내": "가능", "콜센터": "1317"},
+      {"서비스ID": "A013", "서비스명": "자동차등록 안내", "안내분야": "교통", "소관기관": "국토교통부", "온라인안내": "가능", "콜센터": "1399"},
+      {"서비스ID": "A014", "서비스명": "운전면허 안내", "안내분야": "교통", "소관기관": "보건복지부", "온라인안내": "불가", "콜센터": "1357"},
+      {"서비스ID": "A015", "서비스명": "주정차단속 안내", "안내분야": "교통", "소관기관": "국토교통부", "온라인안내": "가능", "콜센터": "1367"},
+      {"서비스ID": "A016", "서비스명": "재난지원금 안내", "안내분야": "재난", "소관기관": "행정안전부", "온라인안내": "불가", "콜센터": "1356"},
+      {"서비스ID": "A017", "서비스명": "대피소 안내", "안내분야": "재난", "소관기관": "국세청", "온라인안내": "가능", "콜센터": "1359"},
+      {"서비스ID": "A018", "서비스명": "안전신고 안내", "안내분야": "재난", "소관기관": "국세청", "온라인안내": "가능", "콜센터": "1357"},
+      {"서비스ID": "A019", "서비스명": "국민취업지원 안내", "안내분야": "일자리", "소관기관": "지자체", "온라인안내": "가능", "콜센터": "1386"},
+      {"서비스ID": "A020", "서비스명": "구직급여 안내", "안내분야": "일자리", "소관기관": "국토교통부", "온라인안내": "불가", "콜센터": "1350"},
+      {"서비스ID": "A021", "서비스명": "청년일자리 안내", "안내분야": "일자리", "소관기관": "지자체", "온라인안내": "가능", "콜센터": "1392"},
+      {"서비스ID": "A022", "서비스명": "평생교육 안내", "안내분야": "교육", "소관기관": "국토교통부", "온라인안내": "가능", "콜센터": "1379"},
+      {"서비스ID": "A023", "서비스명": "학자금 안내", "안내분야": "교육", "소관기관": "지자체", "온라인안내": "가능", "콜센터": "1324"},
+      {"서비스ID": "A024", "서비스명": "교육비지원 안내", "안내분야": "교육", "소관기관": "행정안전부", "온라인안내": "가능", "콜센터": "1368"}
+    ];
+
+    const searchInput = document.getElementById('searchInput');
+    const categorySelect = document.getElementById('categorySelect');
+    const countNumber = document.getElementById('countNumber');
+    const serviceGrid = document.getElementById('serviceGrid');
+
+    // 화면 랜더링 함수
+    function renderServices(list) {
+      countNumber.textContent = list.length;
+      serviceGrid.innerHTML = '';
+
+      if (list.length === 0) {
+        serviceGrid.innerHTML = '<div class="no-results">검색 조건에 맞는 안내서비스가 없습니다.</div>';
+        return;
+      }
+
+      list.forEach(item => {
+        const isOnline = item.온라인안내 === '가능';
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div>
+            <div class="card-header">
+              <span class="card-title">${item.서비스명}</span>
+              <span class="badge-category">${item.안내분야}</span>
+            </div>
+            <div class="card-body">
+              <div class="info-row">
+                <span class="info-label">소관기관</span>
+                <span class="info-value">${item.소관기관}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">온라인안내</span>
+                <span class="info-value online-tag ${isOnline ? 'possible' : 'impossible'}">
+                  ${item.온라인안내}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>콜센터 문의</span>
+            <span class="call-center">☎ ${item.콜센터}</span>
+          </div>
+        `;
+        serviceGrid.appendChild(card);
+      });
+    }
+
+    // 필터 및 검색 처리 함수
+    function filterServices() {
+      const keyword = searchInput.value.trim().toLowerCase();
+      const selectedCategory = categorySelect.value;
+
+      const filtered = serviceData.filter(item => {
+        const matchesKeyword = item.서비스명.toLowerCase().includes(keyword);
+        const matchesCategory = selectedCategory === 'ALL' || item.안내분야 === selectedCategory;
+        return matchesKeyword && matchesCategory;
+      });
+
+      renderServices(filtered);
+    }
+
+    // 이벤트 리스너 등록
+    searchInput.addEventListener('input', filterServices);
+    categorySelect.addEventListener('change', filterServices);
+
+    // 초기 화면 로드
+    renderServices(serviceData);
+  </script>
+</body>
+</html>
